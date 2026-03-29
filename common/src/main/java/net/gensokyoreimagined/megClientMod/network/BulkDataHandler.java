@@ -41,16 +41,16 @@ public final class BulkDataHandler {
             var fields = new Object[8];
 
             if (hasBit(bitmask, BulkEntityDataPayload.FIELD_TRANSLATION)) {
-                fields[BulkEntityDataPayload.FIELD_TRANSLATION] = buf.readVector3f();
+                fields[BulkEntityDataPayload.FIELD_TRANSLATION] = readHalfVector3f(buf);
             }
             if (hasBit(bitmask, BulkEntityDataPayload.FIELD_LEFT_ROTATION)) {
-                fields[BulkEntityDataPayload.FIELD_LEFT_ROTATION] = buf.readQuaternion();
+                fields[BulkEntityDataPayload.FIELD_LEFT_ROTATION] = readHalfQuaternionf(buf);
             }
             if (hasBit(bitmask, BulkEntityDataPayload.FIELD_SCALE)) {
-                fields[BulkEntityDataPayload.FIELD_SCALE] = buf.readVector3f();
+                fields[BulkEntityDataPayload.FIELD_SCALE] = readHalfVector3f(buf);
             }
             if (hasBit(bitmask, BulkEntityDataPayload.FIELD_RIGHT_ROTATION)) {
-                fields[BulkEntityDataPayload.FIELD_RIGHT_ROTATION] = buf.readQuaternion();
+                fields[BulkEntityDataPayload.FIELD_RIGHT_ROTATION] = readHalfQuaternionf(buf);
             }
             if (hasBit(bitmask, BulkEntityDataPayload.FIELD_TRANSFORM_DURATION)) {
                 fields[BulkEntityDataPayload.FIELD_TRANSFORM_DURATION] = buf.readVarInt();
@@ -120,6 +120,44 @@ public final class BulkDataHandler {
                 entity.getEntityData().assignValues(dataValues);
             }
         }
+    }
+
+    private static float halfToFloat(short half) {
+        int h = half & 0xFFFF;
+        int sign = (h & 0x8000) << 16;
+        int exp = (h >>> 10) & 0x1F;
+        int mantissa = h & 0x3FF;
+
+        if (exp == 0) {
+            if (mantissa == 0) return Float.intBitsToFloat(sign);
+            exp = 1;
+            while ((mantissa & 0x400) == 0) {
+                mantissa <<= 1;
+                exp--;
+            }
+            mantissa &= 0x3FF;
+            return Float.intBitsToFloat(sign | ((exp + 127 - 15) << 23) | (mantissa << 13));
+        } else if (exp == 31) {
+            return Float.intBitsToFloat(sign | 0x7F800000 | (mantissa << 13));
+        }
+        return Float.intBitsToFloat(sign | ((exp + 127 - 15) << 23) | (mantissa << 13));
+    }
+
+    private static Vector3f readHalfVector3f(FriendlyByteBuf buf) {
+        return new Vector3f(
+                halfToFloat(buf.readShort()),
+                halfToFloat(buf.readShort()),
+                halfToFloat(buf.readShort())
+        );
+    }
+
+    private static Quaternionf readHalfQuaternionf(FriendlyByteBuf buf) {
+        return new Quaternionf(
+                halfToFloat(buf.readShort()),
+                halfToFloat(buf.readShort()),
+                halfToFloat(buf.readShort()),
+                halfToFloat(buf.readShort())
+        );
     }
 
     private static boolean hasBit(byte bitmask, int bit) {
