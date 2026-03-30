@@ -50,15 +50,17 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Collect JARs
+        run: |
+          mkdir -p release
+          find fabric/build/libs forge/build/libs neoforge/build/libs \
+            -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' \
+            -exec cp {} release/ \;
+
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
           name: Build #${{ github.run_number }}
           body: ${{ steps.changelog.outputs.body }}
-          files: |
-            fabric/build/libs/*.jar
-            forge/build/libs/*.jar
-            neoforge/build/libs/*.jar
-            !**/*-sources.jar
-            !**/*-javadoc.jar
+          files: release/*.jar
