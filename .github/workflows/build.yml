@@ -24,7 +24,12 @@ jobs:
         with:
           gradle-version: '8.8'
 
-      - run: gradle build
+      - name: Set version
+        run: |
+          BASE_VER=$(grep '^version=' gradle.properties | cut -d= -f2 | sed 's/-SNAPSHOT//')
+          echo "VERSION=${BASE_VER}-$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+
+      - run: gradle build -Pversion=${{ env.VERSION }}
 
       - name: Generate changelog
         id: changelog
@@ -52,8 +57,8 @@ jobs:
           name: Build #${{ github.run_number }}
           body: ${{ steps.changelog.outputs.body }}
           files: |
-            fabric/build/libs/*-SNAPSHOT.jar
-            forge/build/libs/*-SNAPSHOT.jar
-            neoforge/build/libs/*-SNAPSHOT.jar
+            fabric/build/libs/*.jar
+            forge/build/libs/*.jar
+            neoforge/build/libs/*.jar
             !**/*-sources.jar
             !**/*-javadoc.jar
