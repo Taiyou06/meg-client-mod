@@ -52,6 +52,8 @@ jobs:
           name: Build #${{ github.run_number }}
           body: ${{ steps.changelog.outputs.body }}
           files: |
-            fabric/build/libs/*.jar
-            forge/build/libs/*.jar
-            neoforge/build/libs/*.jar
+            fabric/build/libs/*-SNAPSHOT.jar
+            forge/build/libs/*-SNAPSHOT.jar
+            neoforge/build/libs/*-SNAPSHOT.jar
+            !**/*-sources.jar
+            !**/*-javadoc.jar
