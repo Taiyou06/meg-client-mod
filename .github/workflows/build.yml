@@ -1,0 +1,57 @@
+name: Build & Publish
+
+on:
+  push:
+    branches: ['*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.8'
+
+      - run: gradle build
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get previous tag or use initial commit
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)
+          COMMITS=$(git log "$PREV_TAG"..HEAD --pretty=format:"- [%h](https://github.com/${{ github.repository }}/commit/%H) %s" --no-merges)
+          if [ -z "$COMMITS" ]; then
+            COMMITS="- [$(git rev-parse --short HEAD)](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) ${{ github.event.head_commit.message }}"
+          fi
+          {
+            echo "body<<EOF"
+            echo "## Changes"
+            echo ""
+            echo "$COMMITS"
+            echo ""
+            echo "Built from \`${{ github.ref_name }}\` @ [\`$(git rev-parse --short HEAD)\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Build #${{ github.run_number }}
+          body: ${{ steps.changelog.outputs.body }}
+          files: |
+            fabric/build/libs/*.jar
+            forge/build/libs/*.jar
+            neoforge/build/libs/*.jar
