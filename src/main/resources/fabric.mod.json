@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "${id}",
+  "version": "${version}",
+  "name": "${name}",
+  "description": "A client-side mod that decodes ModelEngine's optimized bulk entity-data packet into vanilla Display updates.",
+  "authors": [
+    "Taiyouh"
+  ],
+  "contact": {
+    "sources": "https://github.com/Taiyou06/meg-client-mod",
+    "issues": "https://github.com/Taiyou06/meg-client-mod/issues"
+  },
+  "license": "AGPL-3.0",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "net.gensokyoreimagined.megClientMod.MegClientModFabric"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.17",
+    "fabric-api": "*",
+    "minecraft": "${minecraft}"
+  }
+}
