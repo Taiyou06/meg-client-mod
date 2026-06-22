@@ -2,7 +2,7 @@ name: Build & Publish
 
 on:
   push:
-    branches: ['*']
+    branches: [ '**' ]
 
 permissions:
   contents: write
@@ -12,56 +12,59 @@ jobs:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[ci-skip]')"
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
+    - uses: actions/setup-java@v5
+      with:
+        distribution: temurin
+        java-version: 25
 
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.8'
+    - uses: gradle/actions/setup-gradle@v6
+      with:
+        gradle-version: '9.6.0'
 
-      - name: Set version
-        run: |
-          BASE_VER=$(grep '^version=' gradle.properties | cut -d= -f2 | sed 's/-SNAPSHOT//')
-          echo "VERSION=${BASE_VER}-$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+    - name: Set version
+      run: |
+        BASE_VER=$(sed -n 's/^mod\.version *= *"\([^"]*\)".*/\1/p' stonecutter.properties.toml)
+        test -n "$BASE_VER"
+        BASE_VER=${BASE_VER%-SNAPSHOT}
+        echo "VERSION=${BASE_VER}-$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
-      - run: gradle build -Pversion=${{ env.VERSION }}
+    - run: gradle buildAll -Pmod.version=${{ env.VERSION }}
 
-      - name: Generate changelog
-        id: changelog
-        run: |
-          # Get previous tag or use initial commit
-          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)
-          COMMITS=$(git log "$PREV_TAG"..HEAD --pretty=format:"- [%h](https://github.com/${{ github.repository }}/commit/%H) %s" --no-merges)
-          if [ -z "$COMMITS" ]; then
-            COMMITS="- [$(git rev-parse --short HEAD)](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) ${{ github.event.head_commit.message }}"
-          fi
-          {
-            echo "body<<EOF"
-            echo "## Changes"
-            echo ""
-            echo "$COMMITS"
-            echo ""
-            echo "Built from \`${{ github.ref_name }}\` @ [\`$(git rev-parse --short HEAD)\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Get previous tag or use initial commit
+        PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)
+        COMMITS=$(git log "$PREV_TAG"..HEAD --pretty=format:"- [%h](https://github.com/${{ github.repository }}/commit/%H) %s" --no-merges)
+        if [ -z "$COMMITS" ]; then
+          COMMITS="- [$(git rev-parse --short HEAD)](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) ${{ github.event.head_commit.message }}"
+        fi
+        {
+          echo "body<<EOF"
+          echo "## Changes"
+          echo ""
+          echo "$COMMITS"
+          echo ""
+          echo "Built from \`${{ github.ref_name }}\` @ [\`$(git rev-parse --short HEAD)\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})"
+          echo "EOF"
+        } >> "$GITHUB_OUTPUT"
 
-      - name: Collect JARs
-        run: |
-          mkdir -p release
-          find fabric/build/libs forge/build/libs neoforge/build/libs \
-            -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' \
-            -exec cp {} release/ \;
+    - name: Collect JARs
+      run: |
+        mkdir -p release
+        find versions -type f -path '*/build/libs/*.jar' \
+          -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' \
+          -exec cp -v {} release/ \;
+        test -n "$(find release -maxdepth 1 -name '*.jar' -print -quit)"
 
-      - name: Create release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: build-${{ github.run_number }}
-          name: Build #${{ github.run_number }}
-          body: ${{ steps.changelog.outputs.body }}
-          files: release/*.jar
+    - name: Create release
+      uses: softprops/action-gh-release@v3
+      with:
+        tag_name: build-${{ github.run_number }}
+        name: Build #${{ github.run_number }}
+        body: ${{ steps.changelog.outputs.body }}
+        files: release/*.jar
