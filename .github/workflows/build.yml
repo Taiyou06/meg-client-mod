@@ -19,7 +19,7 @@ jobs:
     - uses: actions/setup-java@v5
       with:
         distribution: temurin
-        java-version: 21
+        java-version: 25
 
     - uses: gradle/actions/setup-gradle@v6
       with:
@@ -27,10 +27,12 @@ jobs:
 
     - name: Set version
       run: |
-        BASE_VER=$(grep '^version=' gradle.properties | cut -d= -f2 | sed 's/-SNAPSHOT//')
+        BASE_VER=$(sed -n 's/^mod\.version *= *"\([^"]*\)".*/\1/p' stonecutter.properties.toml)
+        test -n "$BASE_VER"
+        BASE_VER=${BASE_VER%-SNAPSHOT}
         echo "VERSION=${BASE_VER}-$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
-    - run: gradle build -Pversion=${{ env.VERSION }}
+    - run: gradle buildAll -Pmod.version=${{ env.VERSION }}
 
     - name: Generate changelog
       id: changelog
@@ -54,9 +56,10 @@ jobs:
     - name: Collect JARs
       run: |
         mkdir -p release
-        find fabric/build/libs forge/build/libs neoforge/build/libs \
+        find versions -type f -path '*/build/libs/*.jar' \
           -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' \
-          -exec cp {} release/ \;
+          -exec cp -v {} release/ \;
+        test -n "$(find release -maxdepth 1 -name '*.jar' -print -quit)"
 
     - name: Create release
       uses: softprops/action-gh-release@v3
