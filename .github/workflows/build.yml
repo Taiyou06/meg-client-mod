@@ -16,14 +16,12 @@ jobs:
       with:
         fetch-depth: 0
 
-    - uses: actions/setup-java@v5
+    - uses: actions/setup-java@v6
       with:
         distribution: temurin
         java-version: 25
 
     - uses: gradle/actions/setup-gradle@v6
-      with:
-        gradle-version: '9.6.0'
 
     - name: Set version
       run: |
@@ -32,7 +30,7 @@ jobs:
         BASE_VER=${BASE_VER%-SNAPSHOT}
         echo "VERSION=${BASE_VER}-$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
-    - run: gradle buildAll -Pmod.version=${{ env.VERSION }}
+    - run: bash ./gradlew buildAll -Pmod.version=${{ env.VERSION }}
 
     - name: Generate changelog
       id: changelog

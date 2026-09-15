@@ -18,14 +18,14 @@ public record BulkEntityDataPayload(FriendlyByteBuf data) implements CustomPacke
     public static final int FIELD_BRIGHTNESS = 6;
     public static final int FIELD_RENDER_DATA = 7;
 
-    public static final CustomPacketPayload.Type<BulkEntityDataPayload> TYPE =
+    public static final CustomPacketPayload.Type<BulkEntityDataPayload> PAYLOAD_TYPE =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath("modelengine", "bulk_data"));
 
     public static final StreamCodec<FriendlyByteBuf, BulkEntityDataPayload> STREAM_CODEC =
             CustomPacketPayload.codec(BulkEntityDataPayload::write, BulkEntityDataPayload::read);
 
     private void write(FriendlyByteBuf buf) {
-        buf.writeBytes(data.copy());
+        buf.writeBytes(data, data.readerIndex(), data.readableBytes());
     }
 
     private static BulkEntityDataPayload read(FriendlyByteBuf buf) {
@@ -34,6 +34,6 @@ public record BulkEntityDataPayload(FriendlyByteBuf data) implements CustomPacke
 
     @Override
     public Type<BulkEntityDataPayload> type() {
-        return TYPE;
+        return PAYLOAD_TYPE;
     }
 }

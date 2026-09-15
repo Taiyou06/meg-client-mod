@@ -2,10 +2,10 @@
 mod.id = "megclientmod"
 mod.name = "MEG Client Mod"
 mod.group = "net.gensokyoreimagined"
-mod.version = "1.1.0"
+mod.version = "1.2.0"
 
-deps.fabric_loader = "0.19.3"
-loomx.loom_version = "1.17-SNAPSHOT"
+deps.fabric_loader = "0.19.5"
+loomx.loom_version = "1.18.1"
 
 # One jar covers the whole 1.21.x line on Fabric (stable intermediary names). NeoForge runs on
 # Mojang official names, which renamed a class at 1.21.11, so its build targets the latest 1.21.x.
@@ -15,21 +15,22 @@ mod.mc_releases = ["1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4", "1.21.5", "1.
 
 [fabric."1.21.x"]
 mod.mc_compat = ">=1.21 <26"
-deps.fabric_api = "0.141.4+1.21.11"
+deps.fabric_api = "0.141.6+1.21.11"
 
 [neoforge."1.21.x"]
 mod.mc_compat = "[1.21.11, 26)"
-deps.neo_loader = "21.11.42"
+deps.neo_loader = "21.11.45"
 
-# 26.x: unobfuscated, identical API across 26.1 and 26.2, so one jar covers both.
+# 26.x: shared networking signatures and Display metadata layout through 26.3.
 ["26.x"]
 mod.mc_label = "26.x"
-mod.mc_releases = ["26.1", "26.1.1", "26.1.2", "26.2"]
+mod.mc_releases = ["26.1", "26.1.1", "26.1.2", "26.2", "26.3"]
 
 [fabric."26.x"]
-mod.mc_compat = ">=26.1"
-deps.fabric_api = "0.152.1+26.1.2"
+mod.mc_compat = ">=26.1 <=26.3"
+deps.fabric_api = "0.160.5+26.3"
 
 [neoforge."26.x"]
-mod.mc_compat = "[26.1,)"
-deps.neo_loader = "26.1.2.43-beta"
+mod.mc_compat = "[26.1,26.3]"
+# Official 26.3 release; NeoForge has not published a stable 26.3 build yet.
+deps.neo_loader = "26.3.0.0-beta"

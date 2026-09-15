@@ -16,18 +16,18 @@ public class MegClientModFabric implements ClientModInitializer {
         // Fabric renamed playS2C() -> clientboundPlay() in 26.x.
         //? if >=26.1 {
         PayloadTypeRegistry.clientboundPlay().register(
-                BulkEntityDataPayload.TYPE,
+                BulkEntityDataPayload.PAYLOAD_TYPE,
                 BulkEntityDataPayload.STREAM_CODEC
         );
         //?} else {
         /*PayloadTypeRegistry.playS2C().register(
-                BulkEntityDataPayload.TYPE,
+                BulkEntityDataPayload.PAYLOAD_TYPE,
                 BulkEntityDataPayload.STREAM_CODEC
         );
         *///?}
 
         ClientPlayNetworking.registerGlobalReceiver(
-                BulkEntityDataPayload.TYPE,
+                BulkEntityDataPayload.PAYLOAD_TYPE,
                 (payload, context) -> BulkDataHandler.handle(payload)
         );
     }

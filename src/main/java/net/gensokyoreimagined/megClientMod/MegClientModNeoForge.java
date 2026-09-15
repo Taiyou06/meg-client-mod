@@ -29,7 +29,7 @@ public class MegClientModNeoForge {
         event.registrar("1")
                 .optional()
                 .playToClient(
-                        BulkEntityDataPayload.TYPE,
+                        BulkEntityDataPayload.PAYLOAD_TYPE,
                         BulkEntityDataPayload.STREAM_CODEC,
                         (payload, context) -> BulkDataHandler.handle(payload)
                 );
@@ -42,7 +42,7 @@ public class MegClientModNeoForge {
         var conn = Minecraft.getInstance().getConnection();
         if (conn == null)
             return;
-        var channels = Set.of(BulkEntityDataPayload.TYPE.id());
+        var channels = Set.of(BulkEntityDataPayload.PAYLOAD_TYPE.id());
         conn.send(new MinecraftUnregisterPayload(channels));
         conn.send(new MinecraftRegisterPayload(channels));
     }

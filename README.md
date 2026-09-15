@@ -7,7 +7,7 @@ A client-side Minecraft mod that optimizes [Model Engine](https://mythiccraft.io
 - Fabric
 - NeoForge
 
-**Minecraft:** 1.21.x and 26.x
+**Minecraft:** 1.21.x and 26.1-26.3
 
 > Minecraft 26.1 is the first unobfuscated release and requires Java 25; the 1.21.x
 > builds remain on Java 21. A single source tree targets every version via
@@ -22,7 +22,8 @@ Players without the mod receive standard packets as usual, no compatibility issu
 
 ## Installation
 
-Drop the mod JAR into your `mods/` folder (Fabric or NeoForge). No configuration needed. The server must be running Model Engine 4.
+Drop the mod JAR into your `mods/` folder (Fabric or NeoForge). No configuration needed. The server
+must run a Model Engine 4 release compatible with its Minecraft version.
 
 ## Building
 
@@ -30,8 +31,9 @@ Requires JDK 21 **and** JDK 25 installed (26.x targets need Java 25). The Gradle
 runs on Java 25; Gradle provisions/uses JDK 21 for the 1.21.x targets via toolchains.
 
 The build ships **one jar per era per loader** (four jars): `1.21.x` and `26.x`, for Fabric and
-NeoForge. One jar covers a whole line because within a mapping era the runtime names are stable
-(Fabric remaps to intermediary; Mojang official names are aligned) and generic-only changes erase
+NeoForge. The 26.x jars currently cover 26.1 through 26.3; the NeoForge build targets the official
+26.3 beta release. One jar covers a whole line because within a mapping era the runtime names are
+stable (Fabric remaps to intermediary; Mojang official names are aligned) and generic-only changes erase
 at the bytecode level. A single jar cannot span the 1.21 to 26.x boundary (obfuscated vs
 unobfuscated are different mapping namespaces), so each era is built separately. The NeoForge
 1.21.x build targets 1.21.11 (the latest 1.x); older 1.21 patches used different official names
