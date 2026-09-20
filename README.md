@@ -30,8 +30,9 @@ Requires JDK 21 **and** JDK 25 installed (26.x targets need Java 25). The Gradle
 runs on Java 25; Gradle provisions/uses JDK 21 for the 1.21.x targets via toolchains.
 
 The build ships **one jar per era per loader** (four jars): `1.21.x` and `26.x`, for Fabric and
-NeoForge. One jar covers a whole line because within a mapping era the runtime names are stable
-(Fabric remaps to intermediary; Mojang official names are aligned) and generic-only changes erase
+NeoForge. The 26.x jars currently cover 26.1 through 26.3; the NeoForge build targets the official
+26.3 beta release. One jar covers a whole line because within a mapping era the runtime names are
+stable (Fabric remaps to intermediary; Mojang official names are aligned) and generic-only changes erase
 at the bytecode level. A single jar cannot span the 1.21 to 26.x boundary (obfuscated vs
 unobfuscated are different mapping namespaces), so each era is built separately. The NeoForge
 1.21.x build targets 1.21.11 (the latest 1.x); older 1.21 patches used different official names

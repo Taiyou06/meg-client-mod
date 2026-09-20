@@ -25,7 +25,7 @@ public record BulkEntityDataPayload(FriendlyByteBuf data) implements CustomPacke
             CustomPacketPayload.codec(BulkEntityDataPayload::write, BulkEntityDataPayload::read);
 
     private void write(FriendlyByteBuf buf) {
-        buf.writeBytes(data.copy());
+        buf.writeBytes(data, data.readerIndex(), data.readableBytes());
     }
 
     private static BulkEntityDataPayload read(FriendlyByteBuf buf) {
